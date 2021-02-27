@@ -4,7 +4,7 @@ from datetime import datetime
 class LogModel:
     def __init__(self):
         self.__creationDate: datetime = datetime.now()
-        self.__type: str = None
+        self.__log_level: str = None
         self.__filename: str = None
         self.__function: str = None
         self.__line: int = None
@@ -19,12 +19,12 @@ class LogModel:
         self.__creationDate = value
 
     @property
-    def type_log(self) -> str:
-        return self.__type
+    def log_level(self) -> str:
+        return self.__log_level
 
-    @type_log.setter
-    def type_log(self, value: str):
-        self.__type = value
+    @log_level.setter
+    def log_level(self, value: str):
+        self.__log_level = value
 
     @property
     def filename(self) -> str:
@@ -61,7 +61,7 @@ class LogModel:
     def to_dict(self) -> dict:
         return {
             "CreationDate": self.creation_date
-            , "Type": self.type_log
+            , "Type": self.log_level
             , "Filename": self.filename
             , "Function": self.function
             , "Line": self.line_number

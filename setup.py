@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
-VERSION = '0.0.1'
+VERSION = '1.1.4'
 DESCRIPTION = 'Es un paquete que brinda la posibilidad a las clases de almacenar los pasos que se siguen en esta.'
 
 # Setting up
