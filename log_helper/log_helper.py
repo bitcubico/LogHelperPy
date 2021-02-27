@@ -3,7 +3,7 @@ import uuid
 from datetime import datetime
 from inspect import getframeinfo, stack, Traceback
 from logging.handlers import RotatingFileHandler
-from typing import Optional
+from typing import Optional, Union, List
 
 from log_helper.models import LogModel
 
@@ -18,17 +18,28 @@ class LogHelper:
     WARNING: int = 30
     WARN: int = WARNING
 
+    @property
+    def logs(self) -> list:
+        return self.__logs
+
+    @logs.setter
+    def logs(self, value):
+        if type(value) == list:
+            self.__logs.extend(value)
+        elif isinstance(value, LogModel):
+            self.__logs.append(value)
+
     def __init__(self):
-        self.logs: list[LogModel] = []
+        self.__logs: list[LogModel] = []
         self.__log_levels: list[int] = [
-            self.CRITICAL
-            , self.ERROR
-            , self.DEBUG
-            , self.FATAL
-            , self.INFO
-            , self.NOTSET
-            , self.WARNING
-            , self.WARN
+            self.CRITICAL,
+            self.ERROR,
+            self.DEBUG,
+            self.FATAL,
+            self.INFO,
+            self.NOTSET,
+            self.WARNING,
+            self.WARN,
         ]
         self.__logger: logging.Logger = None
 
@@ -87,31 +98,51 @@ class LogHelper:
 
         self.__add_log(self.FATAL, message)
 
+    def add_external_logs(self, logs) -> None:
+        """
+        Agrega a la cola uno o varios logs de una clase externa que herede de LogHelper
+
+        :param logs: Uno o varios logs que se desean agregar al la cola de logs
+        :type logs: Union[LogModel, List[LogModel]]
+        """
+
+        if type(logs) == list:
+            data: list[LogModel] = []
+            for log in logs:
+                if isinstance(log, LogModel):
+                    data.append(log)
+
+            if data.__len__() > 0:
+                self.__logs.extend(logs)
+        elif isinstance(logs, LogModel):
+            self.__logs.append(logs)
+
     def save_logs(self, log_name: str = "app.log", log_level=INFO, max_bytes_per_file: int = 1024 * 1024,
                   backup_count: int = 10) -> bool:
         """
-        Guarda en un archivo determinado los logs ubicados en la pila de logs de la clase
+        Guarda en un archivo determinado los __logs ubicados en la pila de __logs de la clase
 
-        :param log_name: Path del log de la aplicación que usa la clase. En este se registrarán los logs de la clase
+        :param log_name: Path del log de la aplicación que usa la clase. En este se registrarán los __logs de la clase
         :type log_name: str
-        :param log_level: Nivel a partir del cual se van a registrar los logs
+        :param log_level: Nivel a partir del cual se van a registrar los __logs
         :type log_level: int
         :param max_bytes_per_file: Tamaño máximo del log en bytes, por defecto es una mega (1024 Kb)
         :type max_bytes_per_file: int
-        :param backup_count: Cantidad de backups que se desean dejar después que se los logs lleguen a su tamaño máximo
+        :param backup_count: Cantidad de backups que se desean dejar después que se los __logs lleguen a su tamaño
+        máximo
         :type backup_count: int
-        :return: Verdadero si los logs fueron impresos correctamente
+        :return: Verdadero si los __logs fueron impresos correctamente
         :rtype: bool
         """
 
-        if self.logs.__len__() == 0:
+        if self.__logs.__len__() == 0:
             return False
 
         if log_level not in self.__log_levels:
             log_level = self.NOTSET
 
         self.__config_log(log_name, log_level, max_bytes_per_file, backup_count)
-        for log in self.logs:
+        for log in self.__logs:
             if log.log_level == LogHelper.DEBUG:
                 self.__logger.debug(self.__build_message_to_print_in_log(log))
             elif log.log_level == LogHelper.INFO:
@@ -128,15 +159,15 @@ class LogHelper:
 
     def clear_log(self):
         """
-        Limpia el listado de logs
+        Limpia el listado de __logs
         """
 
-        self.logs = []
+        self.__logs = []
 
     @DeprecationWarning
     def add_log(self, logType: int, message: str) -> None:
         """
-        Agrega a la pila de logs un nuevo mensaje
+        Agrega a la pila de __logs un nuevo mensaje
 
         :param logType: Tipo de mensaje
         CRITICAL: int = 50
@@ -159,7 +190,7 @@ class LogHelper:
 
     def __add_log(self, logType: int, message: str) -> None:
         """
-        Agrega a la pila de logs un nuevo mensaje
+        Agrega a la pila de __logs un nuevo mensaje
 
         :param logType: Tipo de mensaje
         CRITICAL: int = 50
@@ -195,20 +226,21 @@ class LogHelper:
         log.message = message.strip()
         log.creation_date = datetime.now()
 
-        self.logs.append(log)
+        self.__logs.append(log)
 
     def __config_log(self, log_name: str = "app.log", log_level=INFO, max_bytes_per_file: int = 1024 * 1024,
                      backup_count: int = 10) -> None:
         """
         Establece las propiedades del logger
 
-        :param log_name: Path del log de la aplicación que usa la clase. En este se registrarán los logs de la clase
+        :param log_name: Path del log de la aplicación que usa la clase. En este se registrarán los __logs de la clase
         :type log_name: str
-        :param log_level: Nivel a partir del cual se van a registrar los logs
+        :param log_level: Nivel a partir del cual se van a registrar los __logs
         :type log_level: int
         :param max_bytes_per_file: Tamaño máximo del log en bytes, por defecto es una mega (1024 Kb)
         :type max_bytes_per_file: int
-        :param backup_count: Cantidad de backups que se desean dejar después que se los logs lleguen a su tamaño máximo
+        :param backup_count: Cantidad de backups que se desean dejar después que se los __logs lleguen a su tamaño
+        máximo
         :type backup_count: int
         """
 
