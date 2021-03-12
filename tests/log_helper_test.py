@@ -1,7 +1,6 @@
 import unittest
 
 from log_helper import LogHelper
-from log_helper.models import LogModel
 
 
 class MyTestCase(unittest.TestCase):

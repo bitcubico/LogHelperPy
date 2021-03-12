@@ -1,5 +1,6 @@
 import logging
 import uuid
+import traceback
 from datetime import datetime
 from inspect import getframeinfo, stack, Traceback
 from logging.handlers import RotatingFileHandler
@@ -30,8 +31,8 @@ class LogHelper:
             self.__logs.append(value)
 
     def __init__(self):
-        self.__logs: list[LogModel] = []
-        self.__log_levels: list[int] = [
+        self.__logs: List[LogModel] = []
+        self.__log_levels: List[int] = [
             self.CRITICAL,
             self.ERROR,
             self.DEBUG,
@@ -105,9 +106,11 @@ class LogHelper:
         :param logs: Uno o varios logs que se desean agregar al la cola de logs
         :type logs: Union[LogModel, List[LogModel]]
         """
+        if logs is None:
+            return
 
         if type(logs) == list:
-            data: list[LogModel] = []
+            data: List[LogModel] = []
             for log in logs:
                 if isinstance(log, LogModel):
                     data.append(log)
@@ -213,7 +216,12 @@ class LogHelper:
             else:
                 message = ex.__str__()
 
-        if message is None or message.strip().__len__() == 0:
+            message += f'\n{traceback.format_exc().__str__()}'
+
+        if message is None:
+            return
+
+        if isinstance(message, str) and message.strip().__len__() == 0:
             return
 
         st = stack()
@@ -223,7 +231,7 @@ class LogHelper:
         log.filename = caller.filename
         log.function = caller.function
         log.line_number = caller.lineno
-        log.message = message.strip()
+        log.message = message
         log.creation_date = datetime.now()
 
         self.__logs.append(log)
@@ -283,7 +291,7 @@ class LogHelper:
 
         log_level_name: str = LogHelper.get_log_level_name(log.log_level)
         message: str = \
-            f'{log.creation_date} |->\t[{log_level_name}]\t{log.message}\t[Line: {log.line_number}]\t[{log.filename}]'
+            f'{log.creation_date} |->\t[{log_level_name}]\t{log.message}\t\t[Line: {log.line_number}]\t[{log.filename}]'
 
         return message
 

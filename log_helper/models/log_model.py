@@ -60,10 +60,10 @@ class LogModel:
 
     def to_dict(self) -> dict:
         return {
-            "CreationDate": self.creation_date
-            , "Type": self.log_level
-            , "Filename": self.filename
-            , "Function": self.function
-            , "Line": self.line_number
-            , "Message": self.message
+            "creation_date": self.creation_date,
+            "log_level": self.log_level,
+            "filename": self.filename,
+            "function": self.function,
+            "line_number": self.line_number,
+            "message": self.message,
         }
